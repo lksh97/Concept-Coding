@@ -1,0 +1,75 @@
+1) Doesn't start the immediately it is an asynchronous method and it returns immediately -
+
+    The comment is indicating that even though thread1.start() is called, the main program continues to execute without waiting for the newly started thread to complete its execution. This is because starting a thread is an asynchronous operation. The main program will continue to execute concurrently with the newly started thread, and both may execute simultaneously depending on the system's scheduling.
+
+    Asynchronous, in the context of programming, refers to a style of execution where tasks can be performed independently of the main program flow. In simpler terms, it means that operations can occur concurrently or in a non-blocking manner, allowing the program to continue executing other tasks without waiting for the completion of the current operation.
+
+    In synchronous programming, tasks are executed sequentially, meaning that each task must wait for the previous one to finish before it can begin. This can lead to inefficiencies, especially when dealing with tasks that involve waiting for external events such as file I/O, network requests, or user input.
+
+    Asynchronous programming, on the other hand, allows tasks to be initiated and executed independently.
+
+    In Java, when you call thread1.start(), it initiates the execution of the run() method in the Thread1 class (assuming Thread1 extends Thread or implements Runnable). This run() method represents the code that will be executed in the new thread.
+
+    The relevance of the comment to asynchronicity lies in the fact that thread1.start() returns immediately after initiating the thread's execution. This means the main program can continue executing without waiting for the run() method to finish. This behavior is similar in spirit to asynchronous programming, where tasks can be initiated without blocking the main program's execution.
+
+    asynchronous programming in environments where concurrency is managed through libraries that provide abstractions for handling asynchronous operations (e.g., CompletableFuture in Java).
+
+2) Output of starting 2 threads
+      Ex1 - main is starting
+            main is exiting
+            Inside thread2 Thread[thread2,5,main], i : 0
+            Inside thread2 Thread[thread2,5,main], i : 1
+            Inside thread2 Thread[thread2,5,main], i : 2
+            Inside thread2 Thread[thread2,5,main], i : 3
+            Inside thread2 Thread[thread2,5,main], i : 4
+            Inside thread1 Thread[thread1,5,main] | i : 0
+            Inside thread1 Thread[thread1,5,main] | i : 1
+            Inside thread1 Thread[thread1,5,main] | i : 2
+            Inside thread1 Thread[thread1,5,main] | i : 3
+            Inside thread1 Thread[thread1,5,main] | i : 4
+
+      Ex2 - main is starting
+            main is exiting
+            Inside thread1 Thread[thread1,5,main] | i : 0
+            Inside thread2 Thread[thread2,5,main], i : 0
+            Inside thread1 Thread[thread1,5,main] | i : 1
+            Inside thread2 Thread[thread2,5,main], i : 1
+            Inside thread1 Thread[thread1,5,main] | i : 2
+            Inside thread2 Thread[thread2,5,main], i : 2
+            Inside thread1 Thread[thread1,5,main] | i : 3
+            Inside thread2 Thread[thread2,5,main], i : 3
+            Inside thread2 Thread[thread2,5,main], i : 4
+            Inside thread1 Thread[thread1,5,main] | i : 4
+
+package main;
+
+public class Main
+{
+    public static void main( String[] args )
+    {
+        System.out.println("main is starting");
+
+        Thread thread1 = new Thread1("thread1"); // here we don't pass object of runnable because this is where method overriding happens by run() in Thread1
+        //1) Doesn't start the thread immediately it is an asynchronous method, and it returns immediately
+        // we don't know when the thread start it is on the mercy of JVM, we just mention that we want to start the thread feel free when we want to do it
+        //  but jvm will call run method -- Don't make any assumption on how program should run, if we call .start(), jvm will at some time call run()
+
+        // set daemon = true, before starting the thread
+        // thread1.setDaemon( true );
+
+        // main thread is parent of thread1
+        thread1.start();
+
+        Thread thread = new Thread(new Thread2(), "thread2"); // takes object/instance of runnable interface, threadName is optional
+        //2) Output of starting 2 threads
+        thread.start();
+
+        // this run method is doing nothing, because by default target attribute of Runnable type in Thread class is null -> check run() in Thread class
+        new Thread().run(); // in order to call target.run(), ensure that target!=null, to do that we pass object of runnable interface eg - new Thread2() (this object becomes target)
+        //  and we call it's run method by target.run() which is new Thread2().run()
+
+        // Which method of creating thread should you use? One class extending thread or using a class implementing runnable interface?
+        // Ans - Since we can implement multiple interface in java but can't extend multiple classes(what if my class require to extend other class) we shhould create a thread using a class implementing runnable interface
+        System.out.println("main is exiting");
+    }
+}
